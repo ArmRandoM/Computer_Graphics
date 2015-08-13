@@ -1,0 +1,153 @@
+#include <GL/glut.h>
+#include <GL/glu.h>
+
+/* descrivo una matrice, più grande è la larghezza e la lunghezza più la scacchiera sarà definita*/
+
+const int larghezza_pavimento = 150, altezza_pavimento = 150;
+
+static GLfloat camera_position[] = {0.0, 11.0, 19.0};
+
+static GLfloat ruota =0.0;
+
+GLubyte pavimento_a_scacchi[larghezza_pavimento][altezza_pavimento][3];
+
+void crea_pavimento_a_scacchi(void)
+{
+	int c = 255;
+
+	for (int i = 0; i < larghezza_pavimento; i++) 
+		{
+			for (int j = 0; j < altezza_pavimento; j++) 
+				{
+
+				    /*Se il quarto bit di "i" è 0 o il quarto bit di "j" è 0, ma non entrambi, allora c = 255, oppure c = 0*/  
+				    /* Loperatore "^" è un operatore logico che viene utilizzato per fare interrogazioni su bit, viene utilizzato 
+				    molto spesso quando si devono fare calcoli per la definizione dei pixel.*/
+					
+					if((j&0x8)^(i&0x8))
+						{
+							pavimento_a_scacchi[i][j][0] = (GLubyte) c;
+							pavimento_a_scacchi[i][j][1] = (GLubyte) c;
+							pavimento_a_scacchi[i][j][2] = (GLubyte) c;
+						}
+					else
+						{
+							pavimento_a_scacchi[i][j][2] = (GLubyte) c;
+							pavimento_a_scacchi[i][j][2] = (GLubyte) c;
+							pavimento_a_scacchi[i][j][2] = (GLubyte) c;
+						}
+				}
+		}
+}
+
+void init(void) 
+{
+
+	glClearColor (0.0, 0.0, 0.0, 0.0);
+	glShadeModel (GL_FLAT);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	crea_pavimento_a_scacchi();
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, larghezza_pavimento, altezza_pavimento, 0, GL_RGB, GL_UNSIGNED_BYTE, &pavimento_a_scacchi[0][0][0]);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	glEnable(GL_TEXTURE_2D);
+	glShadeModel(GL_FLAT);
+
+}
+
+void display(void)
+{
+	
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	glPushMatrix();
+
+		glRotatef( ruota, 0.0, 1.0, 0.0);
+
+		gluLookAt(camera_position[0], camera_position[1], camera_position[2],camera_position[0], 11.0, -500.0, 0.0, 1.0, 0.0);	
+		
+			glBegin(GL_QUADS);
+			
+				glTexCoord2f(0.0, 0.0); glVertex3f(-10.0, 10.0, -10.0);
+				glTexCoord2f(0.0, 1.0); glVertex3f(10.0, 10.0, -10.0);
+				glTexCoord2f(1.0, 1.0); glVertex3f(10.0, 10.0, 10.0);
+				glTexCoord2f(1.0, 0.0); glVertex3f(-10.0, 10.0, 10.0);
+		
+			glEnd();
+	
+	glPopMatrix();
+	
+	glutSwapBuffers();
+}
+
+void reshape (int w, int h)
+{
+   glViewport (0, 0, (GLsizei) w, (GLsizei) h); 
+   glMatrixMode (GL_PROJECTION);
+   glLoadIdentity ();//rimpiazza la matrice corrente con quella di identità
+   gluPerspective(60.0, (GLfloat) w/(GLfloat) h, 1.0, 600.0);
+   glMatrixMode(GL_MODELVIEW);//gestisce le trasformazioni di viewing e modeling
+   glLoadIdentity();
+}
+
+void keyboard (unsigned char key, int x, int y)
+{
+   switch (key)
+	{
+		case 'w':
+			camera_position[2] = camera_position[2] - 0.5;
+			glutPostRedisplay();
+			break;	
+		case 's':
+			camera_position[2] = camera_position[2] + 0.5;
+			glutPostRedisplay();
+			break;
+		case 'a':
+			camera_position[0] = camera_position[0] - 0.5;
+			glutPostRedisplay();
+			break;
+		case 'd':
+			camera_position[0] = camera_position[0] + 0.5;
+			glutPostRedisplay();
+			break;	
+		case 'z':		
+			camera_position[1] = camera_position[1] - 0.5;
+			glutPostRedisplay();
+			break;
+		case 'x':
+			camera_position[1] = camera_position[1] + 0.5;
+			glutPostRedisplay();
+			break;
+		case 'q':	
+			ruota = ((int) ruota - 2) % 360;
+			glutPostRedisplay();
+			break;
+		case 'e':
+			ruota = ((int) ruota + 2) % 360;
+			glutPostRedisplay();
+			break;
+      		default:
+			glutIdleFunc(NULL);
+         		break;
+	}
+}
+
+int main(int argc, char** argv)
+{
+   glutInit(&argc, argv);
+   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+   glutInitWindowSize (400, 400); 
+   glutInitWindowPosition (100, 100);
+   glutCreateWindow ("Pavimento");
+   init ();
+   glutDisplayFunc(display); 
+   glutReshapeFunc(reshape);
+   glutKeyboardFunc(keyboard);
+   glutMainLoop();
+   return 0;
+}
