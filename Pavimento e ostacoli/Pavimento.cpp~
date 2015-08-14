@@ -137,7 +137,15 @@ void keyboard (unsigned char key, int x, int y)
 			camera_position[1] = camera_position[1] + 0.5;
 			glutPostRedisplay();
 			break;
-      	default:
+		case 'q':	
+			ruota = ((int) ruota - 2) % 360;
+			glutPostRedisplay();
+			break;
+		case 'e':
+			ruota = ((int) ruota + 2) % 360;
+			glutPostRedisplay();
+			break;
+      		default:
 			glutIdleFunc(NULL);
          		break;
 	}
