@@ -14,7 +14,9 @@ static GLfloat camera_angle_y = 0.0;
 
 static GLfloat ruota = 0.0;
 
-static GLfloat sposta = 0.2;
+static GLfloat sposta = 0.1;
+
+bool ruotata = false;
 
 GLubyte pavimento_a_scacchi[larghezza_pavimento][altezza_pavimento][3];
 
@@ -71,8 +73,6 @@ void display(void)
 	
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	glMatrixMode(GL_MODELVIEW);//gestisce le trasformazioni di viewing e modeling	
-
 	glPushMatrix();
 
 			gluLookAt(camera_position[0], camera_position[1], camera_position[2], camera_position[0] + camera_direction[0],camera_direction[1],camera_position[2] + camera_direction[2], 0.0, 1.0, 0.0);
@@ -88,9 +88,7 @@ void display(void)
 	
 	glPopMatrix();
 	
-	glutSwapBuffers();
-
-	glLoadIdentity();	
+	glutSwapBuffers();	
 }
 
 void reshape (int w, int h)
@@ -108,25 +106,37 @@ void keyboard (unsigned char key, int x, int y)
    switch (key)
 	{	
 		case 'a':
+			ruotata = true;
 			camera_angle_y -= 0.1;
 			camera_direction[0] = sin(camera_angle_y);
 			camera_direction[2] = -cos(camera_angle_y);
 			glutPostRedisplay();
 			break;
 		case 'd':
+			ruotata = true;
 			camera_angle_y += 0.1;
 			camera_direction[0] = sin(camera_angle_y);
 			camera_direction[2] = -cos(camera_angle_y);
 			glutPostRedisplay();
-       		break;
+       			break;
 		case 'w':
-			camera_position[0] += camera_direction[0] * sposta;
-			camera_position[2] += camera_direction[2] * sposta;
+			if( !ruotata)
+				camera_position[2] -= 0.2;
+			else
+				{	
+					camera_position[0] += camera_direction[0] * sposta;
+					camera_position[2] += camera_direction[2] * sposta;
+				}
 			glutPostRedisplay();
 			break;	
 		case 's':
-			camera_position[0] -= camera_direction[0] * sposta;
-      		camera_position[2] -= camera_direction[2] * sposta;
+			if( !ruotata)
+				camera_position[2] += 0.2;
+			else
+				{
+					camera_position[0] -= camera_direction[0] * sposta;
+		      camera_position[2] -= camera_direction[2] * sposta;
+				}
 			glutPostRedisplay();
 			break;
 		case 'z':		
@@ -137,15 +147,7 @@ void keyboard (unsigned char key, int x, int y)
 			camera_position[1] = camera_position[1] + 0.5;
 			glutPostRedisplay();
 			break;
-		case 'q':	
-			ruota = ((int) ruota - 2) % 360;
-			glutPostRedisplay();
-			break;
-		case 'e':
-			ruota = ((int) ruota + 2) % 360;
-			glutPostRedisplay();
-			break;
-      		default:
+      	default:
 			glutIdleFunc(NULL);
          		break;
 	}
