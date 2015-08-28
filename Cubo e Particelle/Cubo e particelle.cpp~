@@ -92,19 +92,19 @@ void display(void)
 		
 			//prima faccia
                     
-			glNormal3f( -1.0, -1.0, -1.0 );
+			glNormal3f( 0.0, 0.0, -1.0 );
 			glColor3f (1.0 , 0.0 , 0.0);
 			glVertex3f (-1.0 , -1.0, -1.0);
 					
-			glNormal3f( -1.0, 1.0, -1.0 );
+			glNormal3f( 0.0, 0.0, -1.0 );
 			glColor3f (0.0 , 1.0 , 0.0);
 			glVertex3f (-1.0 , 1.0, -1.0);
 			
-			glNormal3f( 1.0, 1.0, -1.0 );
+			glNormal3f( 0.0, 0.0, -1.0);
 			glColor3f (0.0 , 0.0 , 1.0);
 			glVertex3f (1.0, 1.0, -1.0);
 			
-			glNormal3f( 1.0, -1.0, -1.0 );
+			glNormal3f( 0.0, 0.0, -1.0 );
 			glColor3f (0.0 , 1.0 , 1.0);
 			glVertex3f (1.0 , -1.0, -1.0);
 					
@@ -453,6 +453,7 @@ void riposiziona_particelle()
 
 			indiciz[i] = indiciz_copia[i];
 		}
+	glutPostRedisplay();
 }
 
 void reshape (int w, int h)

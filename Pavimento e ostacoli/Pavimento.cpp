@@ -1,6 +1,5 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
-#include <math.h>
 
 // Valori della luce e coordinate
 static GLfloat lightPos[] = { 0.0, 100.0, 0.0, 10.0 };

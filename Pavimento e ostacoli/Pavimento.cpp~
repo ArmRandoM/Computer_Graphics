@@ -1,6 +1,5 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
-#include <math.h>
 
 // Valori della luce e coordinate
 static GLfloat lightPos[] = { 0.0, 100.0, 0.0, 10.0 };
@@ -56,14 +55,14 @@ void init(void)
 	glClearColor (0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);/*Abilita le luci*/
-	glEnable(GL_LIGHT1);/*Abilita il tipo di luce LIGH_0*/
+	glEnable(GL_LIGHT0);/*Abilita il tipo di luce LIGH_0*/
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_COLOR_MATERIAL) ;
 
 	// Specifica la posizione e le coordinate della luce
-	glLightfv(GL_LIGHT1,GL_POSITION, lightPos);	
-	glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,spotDir);	
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 180.0);
+	glLightfv(GL_LIGHT0,GL_POSITION, lightPos);	
+	glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,spotDir);	
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.0);
 	
 	glDepthFunc(GL_LEQUAL);
 	crea_pavimento_a_scacchi();
