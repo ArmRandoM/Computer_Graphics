@@ -68,7 +68,7 @@ int maze[40][40] = { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
              };
 
 
-/*Funzione che carica le texture, prende tre parametri in entrata, un puntatore a carattere che identifica il nome, un intero che identifica la Larghezza dell'immagine e un intero che identifica l' altezza dell'immagine*/
+/*Funzione che carica le texture, prende tre parametri in entrata, un puntatore a carattere che identifica il nome, un intero che identifica la larghezza dell'immagine e un intero che identifica l'altezza dell'immagine*/
 
 GLuint Carica_Texture( const char * Nome_File, int Larghezza, int Altezza )
 {
@@ -78,7 +78,6 @@ GLuint Carica_Texture( const char * Nome_File, int Larghezza, int Altezza )
   file = fopen( Nome_File, "rb" );
   if ( file == NULL ) return 0;
   data = (unsigned char *)malloc( Larghezza * Altezza * 3 );
-  //int size = fseek(file,);
   fread( data, Larghezza * Altezza * 3, 1, file );
   fclose( file );
   for(int i = 0; i < Larghezza * Altezza ; ++i)
@@ -128,7 +127,7 @@ void Costruisci_Mattone()
 	      glTexCoord2f( 1.0f, 0.0f );
 	      glVertex3f(  1.0f, -1.0f, -1.0f );
 
-	      /*Faccia Superiore */
+	      /*Faccia Superiore Del Mattone */
 	      glTexCoord2f( 1.0f, 1.0f );
 	      glVertex3f( -1.0f,  1.0f, -1.0f );
 	      glTexCoord2f( 1.0f, 0.0f );
@@ -138,7 +137,7 @@ void Costruisci_Mattone()
 	      glTexCoord2f( 0.0f, 1.0f );
 	      glVertex3f(  1.0f,  1.0f, -1.0f );
 
-	      /* Faccia Inferiore */
+	      /* Faccia Inferiore Del Mattone*/
 	      glTexCoord2f( 0.0f, 1.0f );
 	      glVertex3f( -1.0f, -1.0f, -1.0f );
 	      glTexCoord2f( 1.0f, 1.0f );
@@ -148,7 +147,7 @@ void Costruisci_Mattone()
 	      glTexCoord2f( 0.0f, 0.0f );
 	      glVertex3f( -1.0f, -1.0f,  1.0f );
 
-	      /* Faccia Destra */
+	      /* Faccia Destra Del Mattone*/
 	      glTexCoord2f( 0.0f, 0.0f );
 	      glVertex3f( 1.0f, -1.0f, -1.0f );
 	      glTexCoord2f( 0.0f, 1.0f );
@@ -158,7 +157,7 @@ void Costruisci_Mattone()
 	      glTexCoord2f( 1.0f, 0.0f );
 	      glVertex3f( 1.0f, -1.0f,  1.0f );
 
-	      /* Faccia Sinistra*/
+	      /* Faccia Sinistra Del Mattone*/
 	      glTexCoord2f( 1.0f, 0.0f );
 	      glVertex3f( -1.0f, -1.0f, -1.0f );
 	      glTexCoord2f( 0.0f, 0.0f );
@@ -211,12 +210,12 @@ void display(void)
 
 		glPushMatrix();
 				glDisable(GL_LIGHTING);
-				glTranslatef( 70.0, 30.0, -30.0 );
+				glTranslatef( 75.0, 50.0, -30.0 );
 				sphere = gluNewQuadric();
 				gluQuadricDrawStyle(sphere, GLU_FILL);
 				gluQuadricTexture(sphere, GL_TRUE);
 				gluQuadricNormals(sphere, GLU_SMOOTH);
-				gluSphere(sphere, 1.5, 100, 100);
+				gluSphere(sphere, 1.5, 1000, 1000);
 				glEnable(GL_LIGHTING);
 		glPopMatrix();
 
