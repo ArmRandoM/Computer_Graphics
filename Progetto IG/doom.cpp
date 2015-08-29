@@ -6,22 +6,24 @@
 using namespace std;
 
 /*posizione ed angolazione della camera modalità 'FPS'*/
-static GLfloat camera_position[] = {3.0, 3.5, 3.0};
-static GLfloat camera_direction[] = {0.0, 3.5, 0.0};
+static GLfloat Posizione_Della_Camera[] = {3.0, 3.5, 3.0};
+static GLfloat Direzione_Della_Camera[] = {0.0, 3.5, 0.0};
 static GLfloat camera_angle_y = 0.0;
 static GLfloat sposta = 0.2;
 bool ruotata = false;
 
-//valore utilizzato per generare le texture della sfera
+/*valore utilizzato per generare le texture della sfera*/
 GLUquadricObj *sphere = NULL;
 
-//valori delle luci
+/*valori dei tipi di illuminazione e dei modi in cui i materiali riflettono la luce*/
 GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
 GLfloat mat_shininess[] = { 10.0 };
 GLfloat light_position[] = { 0.0, 50.0, 0.0, 1.0 };
 
 #define TRUE  1
 #define FALSE 0
+
+/*Per rappresentare la mappa del labirinto è stata utilizzata una matrice 40x40*/
 
 int maze[40][40] = { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 					 1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
@@ -50,7 +52,7 @@ int maze[40][40] = { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 					 1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,1,
 					 1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,1,
 					 1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,1,0,0,1,0,0,1,0,0,1,0,0,1,1,1,
-					 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,1,1,
+					 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,1,1,
 					 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,
 					 1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,
 					 1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
@@ -65,18 +67,21 @@ int maze[40][40] = { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 					 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
              };
 
-GLuint LoadTexture( const char * filename, int width, int height )
+
+/*Funzione che carica le texture, prende tre parametri in entrata, un puntatore a carattere che identifica il nome, un intero che identifica la Larghezza dell'immagine e un intero che identifica l' altezza dell'immagine*/
+
+GLuint Carica_Texture( const char * Nome_File, int Larghezza, int Altezza )
 {
   GLuint texture;
   unsigned char * data;
   FILE * file;
-  file = fopen( filename, "rb" );
+  file = fopen( Nome_File, "rb" );
   if ( file == NULL ) return 0;
-  data = (unsigned char *)malloc( width * height * 3 );
+  data = (unsigned char *)malloc( Larghezza * Altezza * 3 );
   //int size = fseek(file,);
-  fread( data, width * height * 3, 1, file );
+  fread( data, Larghezza * Altezza * 3, 1, file );
   fclose( file );
-  for(int i = 0; i < width * height ; ++i)
+  for(int i = 0; i < Larghezza * Altezza ; ++i)
   	  {
 	  	  int index = i*3;
 	  	  unsigned char B,R;
@@ -93,15 +98,17 @@ GLuint LoadTexture( const char * filename, int width, int height )
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  gluBuild2DMipmaps( GL_TEXTURE_2D, 3, width, height,GL_RGB, GL_UNSIGNED_BYTE, data );
+  gluBuild2DMipmaps( GL_TEXTURE_2D, 3, Larghezza, Altezza,GL_RGB, GL_UNSIGNED_BYTE, data );
   free( data );
   return texture;
 }
 
-void draw_cube()
+/*Funzione che costruisce il "Mattone"*/
+
+void Costruisci_Mattone()
 {
 	    glBegin(GL_QUADS);
-	      /* Front Face */
+	      /* Faccia Anteriore del Mattone */
 	      glTexCoord2f( 0.0f, 1.0 );
 	      glVertex3f( -1.0f, -1.0f, 1.0 );
 	      glTexCoord2f( 1.0, 1.0 );
@@ -111,7 +118,7 @@ void draw_cube()
 	      glTexCoord2f( 0.0, 0.0 );
 	      glVertex3f( -1.0,  1.0, 1.0 );
 
-	      /* Back Face */
+	      /* Faccia Posteriore Del Mattone */
 	      glTexCoord2f( 0.0f, 0.0f );
 	      glVertex3f( -1.0f, -1.0f, -1.0f );
 	      glTexCoord2f( 0.0f, 1.0f );
@@ -121,7 +128,7 @@ void draw_cube()
 	      glTexCoord2f( 1.0f, 0.0f );
 	      glVertex3f(  1.0f, -1.0f, -1.0f );
 
-	      /* Top Face */
+	      /*Faccia Superiore */
 	      glTexCoord2f( 1.0f, 1.0f );
 	      glVertex3f( -1.0f,  1.0f, -1.0f );
 	      glTexCoord2f( 1.0f, 0.0f );
@@ -131,8 +138,7 @@ void draw_cube()
 	      glTexCoord2f( 0.0f, 1.0f );
 	      glVertex3f(  1.0f,  1.0f, -1.0f );
 
-	      /* Bottom Face */
-	      /* Top Right Of The Texture and Quad */
+	      /* Faccia Inferiore */
 	      glTexCoord2f( 0.0f, 1.0f );
 	      glVertex3f( -1.0f, -1.0f, -1.0f );
 	      glTexCoord2f( 1.0f, 1.0f );
@@ -142,7 +148,7 @@ void draw_cube()
 	      glTexCoord2f( 0.0f, 0.0f );
 	      glVertex3f( -1.0f, -1.0f,  1.0f );
 
-	      /* Right face */
+	      /* Faccia Destra */
 	      glTexCoord2f( 0.0f, 0.0f );
 	      glVertex3f( 1.0f, -1.0f, -1.0f );
 	      glTexCoord2f( 0.0f, 1.0f );
@@ -152,7 +158,7 @@ void draw_cube()
 	      glTexCoord2f( 1.0f, 0.0f );
 	      glVertex3f( 1.0f, -1.0f,  1.0f );
 
-	      /* Left Face */
+	      /* Faccia Sinistra*/
 	      glTexCoord2f( 1.0f, 0.0f );
 	      glVertex3f( -1.0f, -1.0f, -1.0f );
 	      glTexCoord2f( 0.0f, 0.0f );
@@ -161,6 +167,7 @@ void draw_cube()
 	      glVertex3f( -1.0f,  1.0f,  1.0f );
 	      glTexCoord2f( 1.0f, 1.0f );
 	      glVertex3f( -1.0f,  1.0f, -1.0f );
+
 	    glEnd( );
 }
 
@@ -185,9 +192,9 @@ void display(void)
 
 	glPushMatrix();
 
-		gluLookAt(camera_position[0], camera_position[1], camera_position[2], camera_position[0] + camera_direction[0],camera_direction[1],camera_position[2] + camera_direction[2], 0.0, 1250.0, 0.0);
+		gluLookAt(Posizione_Della_Camera[0], Posizione_Della_Camera[1], Posizione_Della_Camera[2], Posizione_Della_Camera[0] + Direzione_Della_Camera[0],Direzione_Della_Camera[1],Posizione_Della_Camera[2] + Direzione_Della_Camera[2], 0.0, 1250.0, 0.0);
 
-		GLuint my_texture = LoadTexture( "cielo.bmp", 340, 340);
+		GLuint my_texture = Carica_Texture( "cielo.bmp", 340, 340);
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		glPushMatrix();
@@ -199,7 +206,7 @@ void display(void)
 				gluSphere(sphere, 100.0, 100, 100);
 		glPopMatrix();
 
-		my_texture = LoadTexture( "luna.bmp", 340, 340);
+		my_texture = Carica_Texture( "luna.bmp", 340, 340);
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		glPushMatrix();
@@ -213,7 +220,7 @@ void display(void)
 				glEnable(GL_LIGHTING);
 		glPopMatrix();
 
-		my_texture = LoadTexture( "pavimento.bmp", 340, 340);
+		my_texture = Carica_Texture( "pavimento.bmp", 340, 340);
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		for (int yc = 0; yc < 40; yc++)
@@ -222,12 +229,12 @@ void display(void)
 		    		{
 		    			glPushMatrix();
 		    				glTranslatef( xc*2.0, 0.0, yc*2.0 );
-		    				draw_cube();
+		    				Costruisci_Mattone();
 		    			glPopMatrix();
 		    		}
 		    }
 
-	    my_texture = LoadTexture( "siepi.bmp", 340, 340 );
+	    my_texture = Carica_Texture( "siepi.bmp", 340, 340 );
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		GLfloat y = 2.0;
@@ -242,7 +249,7 @@ void display(void)
 									{
 										glPushMatrix();
 											glTranslatef( xc*2.0, y, yc*2.0 );
-											draw_cube();
+											Costruisci_Mattone();
 										glPopMatrix();
 									}
 							}
@@ -257,7 +264,7 @@ void display(void)
 	glutSwapBuffers();
 }
 
-int tileCollision(GLfloat x, GLfloat z, GLfloat w)
+int Ricerca_Collisioni(GLfloat x, GLfloat z, GLfloat w)
 {
 	unsigned int i, j;
 	unsigned int minx, minz, maxx, maxz;
@@ -269,7 +276,7 @@ int tileCollision(GLfloat x, GLfloat z, GLfloat w)
 	maxx = (x + w - 1) / 2;
 	maxz = (z + w - 1) / 2;
 
-	// Se il rettangolo interseca un tile nella matrice ritorniamo una collisione
+	// Se il rettangolo interseca un mattone nella matrice ritorniamo una collisione
 	for (i = minx; i <= maxx ; i++)
 		{
 			for (j = minz ; j <= maxz ; j++)
@@ -302,34 +309,34 @@ void keyboard (unsigned char key, int x, int y)
 			case 'a':
 				ruotata = true;
 				camera_angle_y -= 0.05;
-				camera_direction[0] = sin(camera_angle_y);
-				camera_direction[2] = -cos(camera_angle_y);
+				Direzione_Della_Camera[0] = sin(camera_angle_y);
+				Direzione_Della_Camera[2] = -cos(camera_angle_y);
 				glutPostRedisplay();
 				break;
 			case 'd':
 				ruotata = true;
 				camera_angle_y += 0.05;
-				camera_direction[0] = sin(camera_angle_y);
-				camera_direction[2] = -cos(camera_angle_y);
+				Direzione_Della_Camera[0] = sin(camera_angle_y);
+				Direzione_Della_Camera[2] = -cos(camera_angle_y);
 				glutPostRedisplay();
        			break;
 			case 'w':
-				xc = (camera_position[0] + camera_direction[0]);
-				zc = ( camera_position[2] + camera_direction[2]);
-				if(!tileCollision( xc, zc, 3.0))
+				xc = (Posizione_Della_Camera[0] + Direzione_Della_Camera[0]);
+				zc = ( Posizione_Della_Camera[2] + Direzione_Della_Camera[2]);
+				if(!Ricerca_Collisioni( xc, zc, 3.0))
 					{
-						camera_position[0] += camera_direction[0] * sposta;
-						camera_position[2] += camera_direction[2] * sposta;
+						Posizione_Della_Camera[0] += Direzione_Della_Camera[0] * sposta;
+						Posizione_Della_Camera[2] += Direzione_Della_Camera[2] * sposta;
 					}
 				glutPostRedisplay();
 				break;
 			case 's':
-				xc = (camera_position[0] - camera_direction[0]);
-				zc = ( camera_position[2] - camera_direction[2]);
-				if(!tileCollision( xc, zc, 3.0))
+				xc = (Posizione_Della_Camera[0] - Direzione_Della_Camera[0]);
+				zc = ( Posizione_Della_Camera[2] - Direzione_Della_Camera[2]);
+				if(!Ricerca_Collisioni( xc, zc, 3.0))
 					{
-						camera_position[0] -= camera_direction[0] * sposta;
-						camera_position[2] -= camera_direction[2] * sposta;
+						Posizione_Della_Camera[0] -= Direzione_Della_Camera[0] * sposta;
+						Posizione_Della_Camera[2] -= Direzione_Della_Camera[2] * sposta;
 					}
 				glutPostRedisplay();
 				break;
