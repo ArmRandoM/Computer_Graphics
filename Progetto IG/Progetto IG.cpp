@@ -3,7 +3,13 @@
 #include <math.h>
 #include <stdio.h>
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 using namespace std;
+
+GLint coordinate_random[2];
+GLint coordinate_random_cubo_rotante[3];
+static int spin = 0.0;
 
 /*posizione ed angolazione della camera modalità 'FPS'*/
 static GLfloat Posizione_Della_Camera[] = {3.0, 3.5, 3.0};
@@ -24,7 +30,6 @@ GLfloat light_position[] = { 0.0, 50.0, 0.0, 1.0 };
 #define FALSE 0
 
 /*Per rappresentare la mappa del labirinto è stata utilizzata una matrice 40x40*/
-
 int maze[40][40] = { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 					 1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
 					 1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
@@ -170,6 +175,72 @@ void Costruisci_Mattone()
 	    glEnd( );
 }
 
+void Costruisci_Il_Cubo_Rotante()
+{
+	    glBegin(GL_QUADS);
+	      /* Faccia Anteriore del Mattone */
+	      glTexCoord2f( 0.0, 1.0 );
+	      glVertex3f( -1.5, -1.5, 1.5 );
+	      glTexCoord2f( 1.0, 1.0 );
+	      glVertex3f(  1.5, -1.5, 1.5 );
+	      glTexCoord2f( 1.0, 0.0 );
+	      glVertex3f(  1.5,  1.5, 1.5 );
+	      glTexCoord2f( 0.0, 0.0 );
+	      glVertex3f( -1.5,  1.5, 1.5 );
+
+	      /* Faccia Posteriore Del Mattone */
+	      glTexCoord2f( 0.0, 0.0 );
+	      glVertex3f( -1.5, -1.5, -1.5 );
+	      glTexCoord2f( 0.0, 1.0 );
+	      glVertex3f( -1.5,  1.5, -1.5 );
+	      glTexCoord2f( 1.0, 1.0 );
+	      glVertex3f(  1.5,  1.5, -1.5 );
+	      glTexCoord2f( 1.0, 0.0 );
+	      glVertex3f(  1.5, -1.5, -1.5 );
+
+	      /*Faccia Superiore Del Mattone */
+	      glTexCoord2f( 1.0, 1.0 );
+	      glVertex3f( -1.5,  1.5, -1.5 );
+	      glTexCoord2f( 1.0, 0.0 );
+	      glVertex3f( -1.5,  1.5,  1.5 );
+	      glTexCoord2f( 0.0, 0.0 );
+	      glVertex3f(  1.5,  1.5,  1.5 );
+	      glTexCoord2f( 0.0, 1.0 );
+	      glVertex3f(  1.5,  1.5, -1.5 );
+
+	      /* Faccia Inferiore Del Mattone*/
+	      glTexCoord2f( 0.0, 1.0 );
+	      glVertex3f( -1.5, -1.5, -1.5 );
+	      glTexCoord2f( 1.0, 1.0 );
+	      glVertex3f(  1.5, -1.5, -1.5 );
+	      glTexCoord2f( 1.0, 0.0 );
+	      glVertex3f(  1.5, -1.5,  1.5 );
+	      glTexCoord2f( 0.0, 0.0 );
+	      glVertex3f( -1.5, -1.5,  1.5 );
+
+	      /* Faccia Destra Del Mattone*/
+	      glTexCoord2f( 0.0, 0.0 );
+	      glVertex3f( 1.5, -1.5, -1.5 );
+	      glTexCoord2f( 0.0, 1.0 );
+	      glVertex3f( 1.5,  1.5, -1.5 );
+	      glTexCoord2f( 1.0, 1.0 );
+	      glVertex3f( 1.5,  1.5,  1.5 );
+	      glTexCoord2f( 1.0, 0.0 );
+	      glVertex3f( 1.5, -1.5,  1.5 );
+
+	      /* Faccia Sinistra Del Mattone*/
+	      glTexCoord2f( 1.0, 0.0 );
+	      glVertex3f( -1.5, -1.5, -1.5 );
+	      glTexCoord2f( 0.0, 0.0 );
+	      glVertex3f( -1.5, -1.5,  1.5 );
+	      glTexCoord2f( 0.0, 1.0 );
+	      glVertex3f( -1.5,  1.5,  1.5 );
+	      glTexCoord2f( 1.0, 1.0 );
+	      glVertex3f( -1.5,  1.5, -1.5 );
+
+	    glEnd( );
+}
+
 void init(void)
 {
 	glClearColor (0.0, 0.0, 0.0, 0.0);
@@ -189,11 +260,25 @@ void display(void)
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 
+	spin = ( spin + 5 ) % 360;
+	glutPostRedisplay();
+
 	glPushMatrix();
 
 		gluLookAt(Posizione_Della_Camera[0], Posizione_Della_Camera[1], Posizione_Della_Camera[2], Posizione_Della_Camera[0] + Direzione_Della_Camera[0],Direzione_Della_Camera[1],Posizione_Della_Camera[2] + Direzione_Della_Camera[2], 0.0, 1250.0, 0.0);
 
-		GLuint my_texture = Carica_Texture( "cielo.bmp", 340, 340);
+		GLuint my_texture = Carica_Texture( "Lingotto.bmp", 340, 340);
+		glBindTexture (GL_TEXTURE_2D, my_texture);
+
+		glPushMatrix();
+			glDisable(GL_LIGHTING);
+			glTranslatef( coordinate_random_cubo_rotante[0], coordinate_random_cubo_rotante[1], coordinate_random_cubo_rotante[2]);
+			glRotatef( spin, 0.0, 1.0, 0.0);
+			Costruisci_Il_Cubo_Rotante();
+			glEnable(GL_LIGHTING);
+		glPopMatrix();
+
+		my_texture = Carica_Texture( "cielo.bmp", 340, 340);
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		glPushMatrix();
@@ -289,6 +374,32 @@ int Ricerca_Collisioni(GLfloat x, GLfloat z, GLfloat w)
 	return 0;
 }
 
+//funzione che genera delle coordinate random e viene chiamata sia per posizionare il giocatore che per posizionare il cubo
+void genera_coordinate_random()
+{
+	coordinate_random[0] = rand() % 80;
+	coordinate_random[1] = rand() % 80;
+
+	while(Ricerca_Collisioni( coordinate_random[0], coordinate_random[1], 3.0))
+		{
+			coordinate_random[0] = rand() % 80;
+			coordinate_random[1] = rand() % 80;
+		}
+
+	Posizione_Della_Camera[0] = coordinate_random[0];
+	Posizione_Della_Camera[2] = coordinate_random[1];
+
+	coordinate_random_cubo_rotante[0] = rand() % 80;
+	coordinate_random_cubo_rotante[1] = 4;
+	coordinate_random_cubo_rotante[2] = rand() % 80;
+
+	while(Ricerca_Collisioni( coordinate_random_cubo_rotante[0], coordinate_random_cubo_rotante[2], 3.0))
+		{
+			coordinate_random_cubo_rotante[0] = rand() % 80;
+			coordinate_random_cubo_rotante[1] = rand() % 80;
+		}
+}
+
 void reshape (int w, int h)
 {
    glViewport (0, 0, (GLsizei) w, (GLsizei) h);
@@ -347,12 +458,14 @@ void keyboard (unsigned char key, int x, int y)
 
 int main(int argc, char** argv)
 {
+   srand(time (0));
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-   glutInitWindowSize (12500, 12500);
+   glutInitWindowSize (1250, 1250);
    glutInitWindowPosition (1250, 1250);
    glutCreateWindow ("Labirinto IG Armando Pezzimenti");
    init ();
+   genera_coordinate_random();
    glutDisplayFunc(display);
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
