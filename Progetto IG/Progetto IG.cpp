@@ -8,8 +8,8 @@
 #include <ctime>
 using namespace std;
 
-GLint coordinate_random[2];
-GLint coordinate_random_cubo_rotante[3];
+static GLint coordinate_random[2];
+static GLint coordinate_random_cubo_rotante[3];
 static int spin = 0.0;
 
 /*posizione ed angolazione della camera modalità 'FPS'*/
@@ -32,7 +32,8 @@ static GLfloat spotDir[] = {0.0, 0.0, 0.0};
 
 /*display list*/
 GLuint DLid;
-GLuint createDL(void);
+GLuint DLid2;
+
 int frame, timer, timebase = 0;
 char s[30];
 
@@ -64,58 +65,58 @@ void printTime(int number, float x, float y)
 	glDisable(GL_LIGHTING);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix(); // save
-	glLoadIdentity();// and clear
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
+		glLoadIdentity();// and clear
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+			glLoadIdentity();
 
-	char* buf;
-	buf = new char[100];
+			char* buf;
+			buf = new char[100];
 
-	if( tempo_rimanente >= 60 || passato_minuto == true)
-		{
-			if( passato_minuto == true)
-				{	if( tempo_rimanente < 10)
-						sprintf(buf,"Tempo Di Gioco 1:0%d", tempo_rimanente);
+			if( tempo_rimanente >= 60 || passato_minuto == true)
+				{
+					if( passato_minuto == true)
+						{	if( tempo_rimanente < 10)
+								sprintf(buf,"Tempo Di Gioco 1:0%d", tempo_rimanente);
+							else
+								sprintf( buf,"Tempo Di Gioco 1:%d", tempo_rimanente);
+						}
 					else
-						sprintf( buf,"Tempo Di Gioco 1:%d", tempo_rimanente);
+						{
+							tempo_rimanente = 0;
+							sprintf(buf,"Tempo Di Gioco 1:%d", tempo_rimanente);
+						}
+					passato_minuto = true;
 				}
-			else
-				{
-					tempo_rimanente = 0;
-					sprintf(buf,"Tempo Di Gioco 1:%d", tempo_rimanente);
-				}
-			passato_minuto = true;
-		}
-	else if( tempo_passato == 120)
-			{
-				tempo_rimanente = 0;
-				sprintf(buf,"HAI PERSO!!! Tempo Di Gioco Rimanente 00:0%d", tempo_rimanente);
-			}
-		 else if( vinto == true )
-				{
-					tempo_rimanente = 0;
-					sprintf(buf, "HAI VINTO!!! Tempo Di Gioco Rimanente 00:0%d", tempo_rimanente);
-				}
-			  else
-				{
-					if( tempo_rimanente < 10)
-						sprintf(buf,"Tempo Di Gioco 0:0%d", tempo_rimanente);
-					else
-						sprintf(buf,"Tempo Di Gioco 0:%d", tempo_rimanente);
-				}
+			else if( tempo_passato == 120)
+					{
+						tempo_rimanente = 0;
+						sprintf(buf,"HAI PERSO!!! Tempo Di Gioco Rimanente 00:0%d", tempo_rimanente);
+					}
+		 		else if( vinto == true )
+						{
+							tempo_rimanente = 0;
+							sprintf(buf, "HAI VINTO!!! Tempo Di Gioco Rimanente 00:0%d", tempo_rimanente);
+						}
+			  		else
+						{
+							if( tempo_rimanente < 10)
+								sprintf(buf,"Tempo Di Gioco 0:0%d", tempo_rimanente);
+							else
+								sprintf(buf,"Tempo Di Gioco 0:%d", tempo_rimanente);
+						}
 
-	glRasterPos2f(x, y); // center of screen. (-1,0) is center left.
-	glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+			glRasterPos3f(x, y, -1); 
+			glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
 	
-	glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24,(const unsigned char*)buf);
+			glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24,(const unsigned char*)buf);
 
-	glEnable(GL_DEPTH_TEST); 
+			glMatrixMode(GL_PROJECTION);
+			glTranslatef(-10.0, -10.0, -10.0);
 
-	glMatrixMode(GL_PROJECTION);
-	glTranslatef(10.0f, 20.0f, -10.0);
-	glPopMatrix(); 
-	glMatrixMode(GL_MODELVIEW);
+		glPopMatrix(); 
+		glMatrixMode(GL_MODELVIEW);
+
 	glPopMatrix();
 
 	glEnable(GL_LIGHTING);
@@ -174,8 +175,6 @@ GLuint Carica_Texture( const char * Nome_File, int Larghezza, int Altezza )
   glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE );
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   gluBuild2DMipmaps( GL_TEXTURE_2D, 3, Larghezza, Altezza,GL_RGB, GL_UNSIGNED_BYTE, data );
   free( data );
   return texture;
@@ -256,70 +255,83 @@ void Costruisci_Mattone()
 	    glEnd( );
 }
 
-void Costruisci_Il_Cubo_Rotante()
+GLuint Costruisci_Il_Cubo_Rotante_DL()
 {
-	    glBegin(GL_QUADS);
-	      /* Faccia Anteriore del Mattone */
-	      glTexCoord2f( 0.0, 1.0 );
-	      glVertex3f( -0.5, -0.5, 0.5 );
-	      glTexCoord2f( 1.0, 1.0 );
-	      glVertex3f(  0.5, -0.5, 0.5 );
-	      glTexCoord2f( 1.0, 0.0 );
-	      glVertex3f(  0.5,  0.5, 0.5 );
-	      glTexCoord2f( 0.0, 0.0 );
-	      glVertex3f( -0.5,  0.5, 0.5 );
+		GLuint DL;
+	
+		DL = glGenLists(1);
 
-	      /* Faccia Posteriore Del Mattone */
-	      glTexCoord2f( 0.0, 0.0 );
-	      glVertex3f( -0.5, -0.5, -0.5 );
-	      glTexCoord2f( 0.0, 1.0 );
-	      glVertex3f( -0.5,  0.5, -0.5 );
-	      glTexCoord2f( 1.0, 1.0 );
-	      glVertex3f(  0.5,  0.5, -0.5 );
-	      glTexCoord2f( 1.0, 0.0 );
-	      glVertex3f(  0.5, -0.5, -0.5 );
+		glNewList( DL, GL_COMPILE);
+		
+			GLuint my_texture = Carica_Texture( "Tesseract.bmp", 240, 240);
+			glBindTexture (GL_TEXTURE_2D, my_texture);
+	
+		    glBegin(GL_QUADS);
+		      /* Faccia Anteriore del Mattone */
+		      glTexCoord2f( 0.0, 1.0 );
+		      glVertex3f( -0.5, -0.5, 0.5 );
+		      glTexCoord2f( 1.0, 1.0 );
+		      glVertex3f(  0.5, -0.5, 0.5 );
+		      glTexCoord2f( 1.0, 0.0 );
+		      glVertex3f(  0.5,  0.5, 0.5 );
+		      glTexCoord2f( 0.0, 0.0 );
+		      glVertex3f( -0.5,  0.5, 0.5 );
+	
+		      /* Faccia Posteriore Del Mattone */
+		      glTexCoord2f( 0.0, 0.0 );
+		      glVertex3f( -0.5, -0.5, -0.5 );
+		      glTexCoord2f( 0.0, 1.0 );
+		      glVertex3f( -0.5,  0.5, -0.5 );
+		      glTexCoord2f( 1.0, 1.0 );
+		      glVertex3f(  0.5,  0.5, -0.5 );
+		      glTexCoord2f( 1.0, 0.0 );
+		      glVertex3f(  0.5, -0.5, -0.5 );
+	
+		      /*Faccia Superiore Del Mattone */
+		      glTexCoord2f( 1.0, 1.0 );
+		      glVertex3f( -0.5,  0.5, -0.5 );
+		      glTexCoord2f( 1.0, 0.0 );
+		      glVertex3f( -0.5,  0.5,  0.5 );
+		      glTexCoord2f( 0.0, 0.0 );
+		      glVertex3f(  0.5,  0.5,  0.5 );
+		      glTexCoord2f( 0.0, 1.0 );
+		      glVertex3f(  0.5,  0.5, -0.5 );
+	
+		      /* Faccia Inferiore Del Mattone*/
+		      glTexCoord2f( 0.0, 1.0 );
+		      glVertex3f( -0.5, -0.5, -0.5 );
+		      glTexCoord2f( 1.0, 1.0 );
+		      glVertex3f(  0.5, -0.5, -0.5 );
+		      glTexCoord2f( 1.0, 0.0 );
+		      glVertex3f(  0.5, -0.5,  0.5 );
+		      glTexCoord2f( 0.0, 0.0 );
+		      glVertex3f( -0.5, -0.5,  0.5 );
+	
+		      /* Faccia Destra Del Mattone*/
+		      glTexCoord2f( 0.0, 0.0 );
+		      glVertex3f( 0.5, -0.5, -0.5 );
+		      glTexCoord2f( 0.0, 1.0 );
+		      glVertex3f( 0.5,  0.5, -0.5 );
+		      glTexCoord2f( 1.0, 1.0 );
+		      glVertex3f( 0.5,  0.5,  0.5 );
+		      glTexCoord2f( 1.0, 0.0 );
+		      glVertex3f( 0.5, -0.5,  0.5 );
+	
+		      /* Faccia Sinistra Del Mattone*/
+		      glTexCoord2f( 1.0, 0.0 );
+		      glVertex3f( -0.5, -0.5, -0.5 );
+		      glTexCoord2f( 0.0, 0.0 );
+		      glVertex3f( -0.5, -0.5,  0.5 );
+		      glTexCoord2f( 0.0, 1.0 );
+		      glVertex3f( -0.5,  0.5,  0.5 );
+		      glTexCoord2f( 1.0, 1.0 );
+		      glVertex3f( -0.5,  0.5, -0.5 );
+	
+		    glEnd( );
 
-	      /*Faccia Superiore Del Mattone */
-	      glTexCoord2f( 1.0, 1.0 );
-	      glVertex3f( -0.5,  0.5, -0.5 );
-	      glTexCoord2f( 1.0, 0.0 );
-	      glVertex3f( -0.5,  0.5,  0.5 );
-	      glTexCoord2f( 0.0, 0.0 );
-	      glVertex3f(  0.5,  0.5,  0.5 );
-	      glTexCoord2f( 0.0, 1.0 );
-	      glVertex3f(  0.5,  0.5, -0.5 );
-
-	      /* Faccia Inferiore Del Mattone*/
-	      glTexCoord2f( 0.0, 1.0 );
-	      glVertex3f( -0.5, -0.5, -0.5 );
-	      glTexCoord2f( 1.0, 1.0 );
-	      glVertex3f(  0.5, -0.5, -0.5 );
-	      glTexCoord2f( 1.0, 0.0 );
-	      glVertex3f(  0.5, -0.5,  0.5 );
-	      glTexCoord2f( 0.0, 0.0 );
-	      glVertex3f( -0.5, -0.5,  0.5 );
-
-	      /* Faccia Destra Del Mattone*/
-	      glTexCoord2f( 0.0, 0.0 );
-	      glVertex3f( 0.5, -0.5, -0.5 );
-	      glTexCoord2f( 0.0, 1.0 );
-	      glVertex3f( 0.5,  0.5, -0.5 );
-	      glTexCoord2f( 1.0, 1.0 );
-	      glVertex3f( 0.5,  0.5,  0.5 );
-	      glTexCoord2f( 1.0, 0.0 );
-	      glVertex3f( 0.5, -0.5,  0.5 );
-
-	      /* Faccia Sinistra Del Mattone*/
-	      glTexCoord2f( 1.0, 0.0 );
-	      glVertex3f( -0.5, -0.5, -0.5 );
-	      glTexCoord2f( 0.0, 0.0 );
-	      glVertex3f( -0.5, -0.5,  0.5 );
-	      glTexCoord2f( 0.0, 1.0 );
-	      glVertex3f( -0.5,  0.5,  0.5 );
-	      glTexCoord2f( 1.0, 1.0 );
-	      glVertex3f( -0.5,  0.5, -0.5 );
-
-	    glEnd( );
+	glEndList();
+	
+	return (DL);
 }
 
 GLuint createDL() 
@@ -346,12 +358,16 @@ GLuint createDL()
 		    {
 		    	for (int xc = 0; xc < 20; xc++)
 		    		{
-		    			glPushMatrix();
-		    				glTranslatef( xc*2.0, 0.0, yc*2.0 );
-		    				glCallList(MattoniDL);
-		    			glPopMatrix();
+						if( maze[xc][yc] != 1)
+		    				{
+								glPushMatrix();
+		    						glTranslatef( xc*2.0, 0.0, yc*2.0 );
+		    						glCallList(MattoniDL);
+		    					glPopMatrix();
+							}
 		    		}
 		    }
+
 	glEndList();
 	
 	glNewList(SiepiDL ,GL_COMPILE);
@@ -393,6 +409,7 @@ GLuint createDL()
 				gluQuadricNormals(sphere, GLU_SMOOTH);
 				gluSphere(sphere, 65.0, 1000, 1000);
 		glPopMatrix();
+
 	glEndList();
 
 	glNewList(LunaDL ,GL_COMPILE);
@@ -414,6 +431,7 @@ GLuint createDL()
 
 	glEndList();
 
+
 	glNewList(loopDL ,GL_COMPILE);
 
 		glCallList(PavimentoDL);
@@ -431,6 +449,7 @@ void init(void)
 	glClearColor (0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
 	DLid = createDL();
+	DLid2 = Costruisci_Il_Cubo_Rotante_DL();
 	glLightfv(GL_LIGHT0,GL_AMBIENT,ambientLight);
 	glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuseLight);
 	glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight);
@@ -445,6 +464,7 @@ void display(void)
 {
 
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
 	glEnable(GL_TEXTURE_2D);
 
 	spin = ( spin + 1 ) % 360;
@@ -453,6 +473,10 @@ void display(void)
 	glPushMatrix();
 
 		gluLookAt(Posizione_Della_Camera[0], Posizione_Della_Camera[1], Posizione_Della_Camera[2], Posizione_Della_Camera[0] + Direzione_Della_Camera[0],Direzione_Della_Camera[1],Posizione_Della_Camera[2] + Direzione_Della_Camera[2], 0.0, 1250.0, 0.0);
+
+		printTime(tempo_rimanente, -0.9, 0.7);
+
+		glCallList(DLid);
 
 		glPushMatrix();
 			glDisable(GL_LIGHTING);
@@ -466,17 +490,11 @@ void display(void)
 				}
 			else 
 				{
-					GLuint my_texture = Carica_Texture( "Tesseract.bmp", 340, 340);
-					glBindTexture (GL_TEXTURE_2D, my_texture);
 					glRotatef( spin, 1.0, 0.0, 0.0);
-					Costruisci_Il_Cubo_Rotante();
+					glCallList(DLid2);
 				}
 			glEnable(GL_LIGHTING);
 		glPopMatrix();
-
-		printTime(tempo_rimanente, -0.9, 0.7);
-
-		glCallList(DLid);
 
 		frame++;
 		timer=glutGet(GLUT_ELAPSED_TIME);
@@ -495,7 +513,7 @@ void display(void)
 int Ricerca_Collisioni(GLfloat x, GLfloat z, GLfloat w)
 {
 	unsigned int i, j;
-	unsigned int minx, minz, maxx, maxz, coordinate_premio, coordinate_premio_z;
+	unsigned int minx, minz, maxx, maxz;
 
 	// Convertiamo le coordinate da pixel in un equivalente per la matrice
 	minx = x / 2;
@@ -627,16 +645,15 @@ void keyboard (unsigned char key, int x, int y)
 int main(int argc, char** argv)
 {
    srand(time (0));
+   genera_coordinate_random();
    glutInit(&argc, argv);
-   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
    glutInitWindowSize (800, 800);
    glutInitWindowPosition (5, 5);
    glutCreateWindow ("Labirinto IG Armando Pezzimenti");
    init ();
    glutTimerFunc(0, Tempo_Rimanente, 345);
-   genera_coordinate_random();
    glutDisplayFunc(display);
-   glutIdleFunc(display);
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
    glutMainLoop();
