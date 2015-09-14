@@ -31,11 +31,16 @@ static GLfloat lightPos[] = { 45.0, 25.0, 0.0, 0.5 };
 static GLfloat spotDir[] = {0.0, 0.0, 0.0};
 
 /*display list*/
-GLuint DLid;
-GLuint DLid2;
+GLuint DLLabirintoAsgardiano;
+GLuint DLLabirintoTerrestre;
+GLuint DLTesseract;
 
 int frame, timer, timebase = 0;
 char s[30];
+
+bool Asgard = false;
+bool Terra = true;
+
 
 bool vinto = false;
 bool passato_minuto = false;
@@ -150,13 +155,16 @@ int maze[20][20] = { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 
 /*Funzione che carica le texture, prende tre parametri in entrata, un puntatore a carattere che identifica il nome, un intero che identifica la larghezza dell'immagine e un intero che identifica l'altezza dell'immagine*/
 
-GLuint Carica_Texture( const char * Nome_File, int Larghezza, int Altezza )
+GLuint Carica_Texture( const char * Nome_File)
 {
   GLuint texture;
   unsigned char * data;
   FILE * file;
   file = fopen( Nome_File, "rb" );
+  int Larghezza, Altezza;
   if ( file == NULL ) return 0;
+  Larghezza = 340;
+  Altezza = 340;
   data = (unsigned char *)malloc( Larghezza * Altezza * 3 );
   fread( data, Larghezza * Altezza * 3, 1, file );
   fclose( file );
@@ -258,12 +266,12 @@ void Costruisci_Mattone()
 GLuint Costruisci_Il_Cubo_Rotante_DL()
 {
 		GLuint DL;
-	
+
 		DL = glGenLists(1);
 
 		glNewList( DL, GL_COMPILE);
 		
-			GLuint my_texture = Carica_Texture( "Tesseract.bmp", 240, 240);
+			GLuint my_texture = Carica_Texture( "Tesseract.bmp");
 			glBindTexture (GL_TEXTURE_2D, my_texture);
 	
 		    glBegin(GL_QUADS);
@@ -334,7 +342,7 @@ GLuint Costruisci_Il_Cubo_Rotante_DL()
 	return (DL);
 }
 
-GLuint createDL() 
+GLuint Terra() 
 {
 	GLuint MattoniDL, PavimentoDL, SiepiDL, CieloDL, LunaDL, loopDL;
 
@@ -351,7 +359,7 @@ GLuint createDL()
 
 	glNewList(PavimentoDL ,GL_COMPILE);
 
-		GLuint my_texture = Carica_Texture( "pavimento.bmp", 340, 340);
+		GLuint my_texture = Carica_Texture( "pavimento.bmp");
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		for (int yc = 0; yc < 20; yc++)
@@ -372,7 +380,7 @@ GLuint createDL()
 	
 	glNewList(SiepiDL ,GL_COMPILE);
 
-	    my_texture = Carica_Texture( "siepi.bmp", 340, 340 );
+	    my_texture = Carica_Texture( "siepi.bmp" );
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		GLfloat y = 2.0;
@@ -398,7 +406,8 @@ GLuint createDL()
 	glEndList();
 
 	glNewList(CieloDL ,GL_COMPILE);
-		my_texture = Carica_Texture( "cielo.bmp", 340, 340);
+
+		my_texture = Carica_Texture( "cielo.bmp");
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		glPushMatrix();
@@ -413,7 +422,120 @@ GLuint createDL()
 	glEndList();
 
 	glNewList(LunaDL ,GL_COMPILE);
-		my_texture = Carica_Texture( "luna.bmp", 340, 340);
+
+		my_texture = Carica_Texture( "luna.bmp");
+		glBindTexture (GL_TEXTURE_2D, my_texture);
+
+		glPushMatrix();
+				glLightfv(GL_LIGHT0,GL_POSITION, lightPos);
+				glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,spotDir);
+				glDisable(GL_LIGHTING);
+				glTranslatef( 45.0, 25.0, 0.0 );
+				sphere = gluNewQuadric();
+				gluQuadricDrawStyle(sphere, GLU_FILL);
+				gluQuadricTexture(sphere, GL_TRUE);
+				gluQuadricNormals(sphere, GLU_SMOOTH);
+				gluSphere(sphere, 0.8, 50, 50);
+				glEnable(GL_LIGHTING);
+		glPopMatrix();
+
+	glEndList();
+
+
+	glNewList(loopDL ,GL_COMPILE);
+
+		glCallList(PavimentoDL);
+		glCallList(SiepiDL);
+		glCallList(CieloDL);
+		glCallList(LunaDL);
+
+	glEndList();
+
+	return(loopDL);
+}
+
+GLuint Asgard() 
+{
+	GLuint MattoniDL, PavimentoDL, SiepiDL, CieloDL, LunaDL, loopDL;
+
+	MattoniDL = glGenLists(1);
+	PavimentoDL = glGenLists(1);
+	SiepiDL = glGenLists(1);
+	CieloDL = glGenLists(1);
+	LunaDL = glGenLists(1);
+	loopDL = glGenLists(1);
+
+	glNewList(MattoniDL,GL_COMPILE);
+		Costruisci_Mattone();
+	glEndList();
+
+	glNewList(PavimentoDL ,GL_COMPILE);
+
+		GLuint my_texture = Carica_Texture( "Bifrost.bmp");
+		glBindTexture (GL_TEXTURE_2D, my_texture);
+
+		for (int yc = 0; yc < 20; yc++)
+		    {
+		    	for (int xc = 0; xc < 20; xc++)
+		    		{
+						if( maze[xc][yc] != 1)
+		    				{
+								glPushMatrix();
+		    						glTranslatef( xc*2.0, 0.0, yc*2.0 );
+		    						glCallList(MattoniDL);
+		    					glPopMatrix();
+							}
+		    		}
+		    }
+
+	glEndList();
+	
+	glNewList(SiepiDL ,GL_COMPILE);
+
+	    my_texture = Carica_Texture( "Gold.bmp");
+		glBindTexture (GL_TEXTURE_2D, my_texture);
+
+		GLfloat y = 2.0;
+
+		for( int i = 0; i < 3; i++)
+			{
+				for (int yc = 0; yc < 20; yc++)
+					{
+						for (int xc = 0; xc < 20; xc++)
+							{
+								if (maze[ xc][yc] == 1)
+									{
+										glPushMatrix();
+											glTranslatef( xc*2.0, y, yc*2.0 );
+											glCallList(MattoniDL);
+										glPopMatrix();
+									}
+							}
+					}
+				y = y + 2;
+			}
+
+	glEndList();
+
+	glNewList(CieloDL ,GL_COMPILE);
+
+		my_texture = Carica_Texture( "CieloAsgard.bmp");
+		glBindTexture (GL_TEXTURE_2D, my_texture);
+
+		glPushMatrix();
+			glTranslatef( 40.0, 0.0, 40.0 );
+				sphere = gluNewQuadric();
+				gluQuadricDrawStyle(sphere, GLU_FILL);
+				gluQuadricTexture(sphere, GL_TRUE);
+				gluQuadricNormals(sphere, GLU_SMOOTH);
+				gluSphere(sphere, 65.0, 1000, 1000);
+		glPopMatrix();
+
+	glEndList();
+
+	glNewList(LunaDL ,GL_COMPILE);
+
+		my_texture = Carica_Texture( "luna.bmp");
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		glPushMatrix();
@@ -448,8 +570,9 @@ void init(void)
 {
 	glClearColor (0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
-	DLid = createDL();
-	DLid2 = Costruisci_Il_Cubo_Rotante_DL();
+	DLLabirintoTerrestre = Terra();
+	DLLabirintoAsgardiano = Asgard();
+	DLTesseract = Costruisci_Il_Cubo_Rotante_DL();
 	glLightfv(GL_LIGHT0,GL_AMBIENT,ambientLight);
 	glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuseLight);
 	glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight);
@@ -472,18 +595,24 @@ void display(void)
 
 	glPushMatrix();
 
-		gluLookAt(Posizione_Della_Camera[0], Posizione_Della_Camera[1], Posizione_Della_Camera[2], Posizione_Della_Camera[0] + Direzione_Della_Camera[0],Direzione_Della_Camera[1],Posizione_Della_Camera[2] + Direzione_Della_Camera[2], 0.0, 1250.0, 0.0);
+		gluLookAt(Posizione_Della_Camera[0], Posizione_Della_Camera[1], Posizione_Della_Camera[2], Posizione_Della_Camera[0] + Direzione_Della_Camera[0],Direzione_Della_Camera[1],Posizione_Della_Camera[2] + Direzione_Della_Camera[2], 0.0, 1.0, 0.0);
 
 		printTime(tempo_rimanente, -0.9, 0.7);
 
-		glCallList(DLid);
-
+		if( Asgard == true)
+			glCallList(DLLabirintoAsgardiano);
+		else
+			glCallList(DLLabirintoTerrestre);
+	
 		glPushMatrix();
+
 			glDisable(GL_LIGHTING);
+
 			glTranslatef( coordinate_random_cubo_rotante[0], coordinate_random_cubo_rotante[1], coordinate_random_cubo_rotante[2]);
+
 			if( vinto == true)
 				{	
-					GLuint my_texture = Carica_Texture( "Vortice.bmp", 340, 340);
+					GLuint my_texture = Carica_Texture( "Vortice.bmp");
 					glBindTexture (GL_TEXTURE_2D, my_texture);
 					glRotatef( spin, 0.0, 1.0, 0.0);
 					gluSphere( sphere, 0.5, 100, 100);
@@ -491,19 +620,20 @@ void display(void)
 			else 
 				{
 					glRotatef( spin, 1.0, 0.0, 0.0);
-					glCallList(DLid2);
+					glCallList(DLTesseract);
 				}
 			glEnable(GL_LIGHTING);
+
 		glPopMatrix();
 
-//		frame++;
-//		timer=glutGet(GLUT_ELAPSED_TIME);
-//		if (timer - timebase > 1000) {
-//			sprintf(s,"FPS:%4.2f",frame*1000.0/(timer-timebase));
-//			glutSetWindowTitle(s);
-//			timebase = timer;		
-//			frame = 0;
-//		}
+		frame++;
+		timer=glutGet(GLUT_ELAPSED_TIME);
+		if (timer - timebase > 1000) {
+			sprintf(s,"FPS:%4.2f",frame*1000.0/(timer-timebase));
+			glutSetWindowTitle(s);
+			timebase = timer;
+			frame = 0;
+		}
 	
 	glPopMatrix();
 
@@ -635,6 +765,14 @@ void keyboard (unsigned char key, int x, int y)
 						Posizione_Della_Camera[2] -= Direzione_Della_Camera[2] * sposta;
 					}
 				glutPostRedisplay();
+				break;
+			case 'T':
+				Terra = true;
+				Asgard = false;
+				break;
+			case 'A':
+				Terra = false;
+				Asgard = true;	
 				break;
 		default:
 			glutIdleFunc(NULL);
