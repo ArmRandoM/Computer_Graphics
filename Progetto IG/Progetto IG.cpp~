@@ -38,8 +38,8 @@ GLuint DLTesseract;
 int frame, timer, timebase = 0;
 char s[30];
 
-bool Asgard = false;
-bool Terra = true;
+bool asgard = false;
+bool terra = true;
 
 
 bool vinto = false;
@@ -194,6 +194,24 @@ void Costruisci_Mattone()
 {
 	    glBegin(GL_QUADS);
 
+	      /*Faccia Superiore Del Mattone */
+		  glNormal3f( 0.0, -1.0, 0.0 );
+	      glTexCoord2f( 1.0f, 1.0f );
+	      glVertex3f( -1.0f, 1.0f, -1.0f );
+	      glTexCoord2f( 1.0f, 0.0f );
+	      glVertex3f( -1.0f,  1.0f,  1.0f );
+	      glTexCoord2f( 0.0f, 0.0f );
+	      glVertex3f(  1.0f,  1.0f,  1.0f );
+	      glTexCoord2f( 0.0f, 1.0f );
+	      glVertex3f(  1.0f,  1.0f, -1.0f );
+
+	    glEnd( );
+}
+
+void Costruisci_Muro()
+{
+	    glBegin(GL_QUADS);
+
 	      /* Faccia Anteriore del Mattone */
 		  glNormal3f( 0.0, 0.0, 1.0 );
 	      glTexCoord2f( 0.0f, 1.0 );
@@ -215,28 +233,6 @@ void Costruisci_Mattone()
 	      glVertex3f(  1.0f,  1.0f, -1.0f );
 	      glTexCoord2f( 1.0f, 0.0f );
 	      glVertex3f(  1.0f, -1.0f, -1.0f );
-
-	      /*Faccia Superiore Del Mattone */
-		  glNormal3f( 0.0, -1.0, 0.0 );
-	      glTexCoord2f( 1.0f, 1.0f );
-	      glVertex3f( -1.0f, 1.0f, -1.0f );
-	      glTexCoord2f( 1.0f, 0.0f );
-	      glVertex3f( -1.0f,  1.0f,  1.0f );
-	      glTexCoord2f( 0.0f, 0.0f );
-	      glVertex3f(  1.0f,  1.0f,  1.0f );
-	      glTexCoord2f( 0.0f, 1.0f );
-	      glVertex3f(  1.0f,  1.0f, -1.0f );
-
-	      /* Faccia Inferiore Del Mattone*/
-		  glNormal3f( 0.0, 1.0, 0.0 );
-	      glTexCoord2f( 0.0f, 1.0f );
-	      glVertex3f( -1.0f, -1.0f, -1.0f );
-	      glTexCoord2f( 1.0f, 1.0f );
-	      glVertex3f(  1.0f, -1.0f, -1.0f );
-	      glTexCoord2f( 1.0f, 0.0f );
-	      glVertex3f(  1.0f, -1.0f,  1.0f );
-	      glTexCoord2f( 0.0f, 0.0f );
-	      glVertex3f( -1.0f, -1.0f,  1.0f );
 
 	      /* Faccia Destra Del Mattone*/
 		  glNormal3f( 1.0, 0.0, 0.0 );
@@ -344,9 +340,10 @@ GLuint Costruisci_Il_Cubo_Rotante_DL()
 
 GLuint Terra() 
 {
-	GLuint MattoniDL, PavimentoDL, SiepiDL, CieloDL, LunaDL, loopDL;
+	GLuint MattoniDL, SiepeDL, PavimentoDL, SiepiDL, CieloDL, LunaDL, loopDL;
 
 	MattoniDL = glGenLists(1);
+	SiepeDL = glGenLists(1);
 	PavimentoDL = glGenLists(1);
 	SiepiDL = glGenLists(1);
 	CieloDL = glGenLists(1);
@@ -355,6 +352,10 @@ GLuint Terra()
 
 	glNewList(MattoniDL,GL_COMPILE);
 		Costruisci_Mattone();
+	glEndList();
+
+	glNewList(SiepeDL, GL_COMPILE);
+		Costruisci_Muro();
 	glEndList();
 
 	glNewList(PavimentoDL ,GL_COMPILE);
@@ -395,7 +396,7 @@ GLuint Terra()
 									{
 										glPushMatrix();
 											glTranslatef( xc*2.0, y, yc*2.0 );
-											glCallList(MattoniDL);
+											glCallList(SiepeDL);
 										glPopMatrix();
 									}
 							}
@@ -456,17 +457,25 @@ GLuint Terra()
 
 GLuint Asgard() 
 {
-	GLuint MattoniDL, PavimentoDL, SiepiDL, CieloDL, LunaDL, loopDL;
+	GLuint MattoniDL, MuroDL, PavimentoDL, MuriDL, CieloDL, LunaDL, loopDL;
 
 	MattoniDL = glGenLists(1);
+	MuroDL = glGenLists(1);
 	PavimentoDL = glGenLists(1);
-	SiepiDL = glGenLists(1);
+	MuriDL = glGenLists(1);
 	CieloDL = glGenLists(1);
 	LunaDL = glGenLists(1);
 	loopDL = glGenLists(1);
 
 	glNewList(MattoniDL,GL_COMPILE);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);	
 		Costruisci_Mattone();
+		glDisable(GL_BLEND);
+	glEndList();
+
+	glNewList(MuroDL, GL_COMPILE);
+		Costruisci_Muro();
 	glEndList();
 
 	glNewList(PavimentoDL ,GL_COMPILE);
@@ -490,7 +499,7 @@ GLuint Asgard()
 
 	glEndList();
 	
-	glNewList(SiepiDL ,GL_COMPILE);
+	glNewList(MuriDL ,GL_COMPILE);
 
 	    my_texture = Carica_Texture( "Gold.bmp");
 		glBindTexture (GL_TEXTURE_2D, my_texture);
@@ -507,7 +516,7 @@ GLuint Asgard()
 									{
 										glPushMatrix();
 											glTranslatef( xc*2.0, y, yc*2.0 );
-											glCallList(MattoniDL);
+											glCallList(MuroDL);
 										glPopMatrix();
 									}
 							}
@@ -519,7 +528,7 @@ GLuint Asgard()
 
 	glNewList(CieloDL ,GL_COMPILE);
 
-		my_texture = Carica_Texture( "CieloAsgard.bmp");
+		my_texture = Carica_Texture( "Cielo.bmp");
 		glBindTexture (GL_TEXTURE_2D, my_texture);
 
 		glPushMatrix();
@@ -556,10 +565,10 @@ GLuint Asgard()
 
 	glNewList(loopDL ,GL_COMPILE);
 
-		glCallList(PavimentoDL);
-		glCallList(SiepiDL);
+		glCallList(MuriDL);
 		glCallList(CieloDL);
 		glCallList(LunaDL);
+		glCallList(PavimentoDL);
 
 	glEndList();
 
@@ -599,7 +608,7 @@ void display(void)
 
 		printTime(tempo_rimanente, -0.9, 0.7);
 
-		if( Asgard == true)
+		if( asgard == true)
 			glCallList(DLLabirintoAsgardiano);
 		else
 			glCallList(DLLabirintoTerrestre);
@@ -767,12 +776,12 @@ void keyboard (unsigned char key, int x, int y)
 				glutPostRedisplay();
 				break;
 			case 'T':
-				Terra = true;
-				Asgard = false;
+				terra = true;
+				asgard = false;
 				break;
 			case 'A':
-				Terra = false;
-				Asgard = true;	
+				terra = false;
+				asgard = true;	
 				break;
 		default:
 			glutIdleFunc(NULL);
