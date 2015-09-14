@@ -73,44 +73,23 @@ void printTime(int number, float x, float y)
 		glLoadIdentity();// and clear
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
+			
 			glLoadIdentity();
 
 			char* buf;
 			buf = new char[100];
 
-			if( tempo_rimanente >= 60 || passato_minuto == true)
+			if(tempo_passato/60 < 3 && vinto != true)
 				{
-					if( passato_minuto == true)
-						{	if( tempo_rimanente < 10)
-								sprintf(buf,"Tempo Di Gioco 1:0%d", tempo_rimanente);
-							else
-								sprintf( buf,"Tempo Di Gioco 1:%d", tempo_rimanente);
-						}
+					if( ( tempo_rimanente % 60 ) < 10 )
+						snprintf ( buf, 100, "Tempo Di Gioco %d:0%d", tempo_passato/60, tempo_rimanente % 60 );
 					else
-						{
-							tempo_rimanente = 0;
-							sprintf(buf,"Tempo Di Gioco 1:%d", tempo_rimanente);
-						}
-					passato_minuto = true;
+						snprintf ( buf, 100, "Tempo Di Gioco %d:%d", tempo_passato/60, tempo_rimanente % 60 );
 				}
-			else if( tempo_passato == 120)
-					{
-						tempo_rimanente = 0;
-						sprintf(buf,"HAI PERSO!!! Tempo Di Gioco Rimanente 00:0%d", tempo_rimanente);
-					}
-		 		else if( vinto == true )
-						{
-							tempo_rimanente = 0;
-							sprintf(buf, "HAI VINTO!!! Tempo Di Gioco Rimanente 00:0%d", tempo_rimanente);
-						}
-			  		else
-						{
-							if( tempo_rimanente < 10)
-								sprintf(buf,"Tempo Di Gioco 0:0%d", tempo_rimanente);
-							else
-								sprintf(buf,"Tempo Di Gioco 0:%d", tempo_rimanente);
-						}
-
+			else if( vinto == true)
+					snprintf( buf, 100, "Hai vinto!!");
+				 else snprintf ( buf, 100, "Hai Perso!!");
+	
 			glRasterPos3f(x, y, -1); 
 			glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
 	
@@ -795,7 +774,7 @@ int main(int argc, char** argv)
    genera_coordinate_random();
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-   glutInitWindowSize (800, 800);
+   glutInitWindowSize ( 1250, 1250);
    glutInitWindowPosition (5, 5);
    glutCreateWindow ("Labirinto IG Armando Pezzimenti");
    init ();
