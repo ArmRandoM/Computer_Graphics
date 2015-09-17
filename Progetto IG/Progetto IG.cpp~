@@ -14,7 +14,7 @@ static GLint coordinate_random_cubo_rotante[3];
 static int spin = 0.0;
 
 /*variabili per il posizionamento e per la gestione dell'angolazione della camera in modalità 'FPS'*/
-static GLfloat Posizione_Della_Camera[] = {3.0, 40.0, 3.0};
+static GLfloat Posizione_Della_Camera[] = {3.0, 4.0, 3.0};
 static GLfloat Direzione_Della_Camera[] = {0.0, 4.0, 0.0};
 static GLfloat camera_angle_y = 0.0;
 static GLfloat sposta = 0.2;
@@ -727,7 +727,7 @@ void genera_coordinate_random()
 	coordinate_random_cubo_rotante[1] = 4;
 	coordinate_random_cubo_rotante[2] = rand() % 40;
 
-	while((Ricerca_Collisioni( coordinate_random_cubo_rotante[0], coordinate_random_cubo_rotante[2], 2.0)) && ((coordinate_random[0] - coordinate_random_cubo_rotante[0] <= 20) || (coordinate_random[1] - coordinate_random_cubo_rotante[2] <= 20)))
+	while(Ricerca_Collisioni( coordinate_random_cubo_rotante[0], coordinate_random_cubo_rotante[2], 2.0))
 		{
 			coordinate_random_cubo_rotante[0] = rand() % 40;
 			coordinate_random_cubo_rotante[2] = rand() % 40;

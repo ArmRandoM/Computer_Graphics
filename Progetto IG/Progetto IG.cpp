@@ -8,7 +8,7 @@
 #include <ctime>
 using namespace std;
 
-/*variabili per la gestione del posizionamento casuale della camera, del Tesseract e per la sua rotazione*/
+/*variabili per la gestione del posizionamento casuale della camera, del Tesseract e della sua rotazione*/
 static GLint coordinate_random[2];
 static GLint coordinate_random_cubo_rotante[3];
 static int spin = 0.0;
@@ -155,7 +155,7 @@ int maze[20][20] =
 					};
 
 
-/*Funzione che carica le texture, prende tre parametri in entrata, un puntatore a carattere che identifica il nome, un intero che identifica la larghezza dell'immagine e un intero che identifica l'altezza dell'immagine*/
+/*Funzione utilizzata per il caricamento delle texture, prende un parametro in entrata definito da un puntatore a carattere che identifica il nome*/
 
 GLuint Carica_Texture( const char * Nome_File)
 {
@@ -200,7 +200,7 @@ void Costruisci_Mattone()
 	glTexCoord2f( 1.0f, 1.0f );
 	glVertex3f( -1.0f, 1.0f, -1.0f );
 	glTexCoord2f( 1.0f, 0.0f );
-	glVertex3f( -1.0f,  1.0f,  1.0f );	
+	glVertex3f( -1.0f,  1.0f,  1.0f );
 	glTexCoord2f( 0.0f, 0.0f );
 	glVertex3f(  1.0f,  1.0f,  1.0f );
 	glTexCoord2f( 0.0f, 1.0f );
